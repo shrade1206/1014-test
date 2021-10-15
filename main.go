@@ -39,7 +39,7 @@ func reader(conn *websocket.Conn) {
 	var a []byte
 
 	for {
-		_, p, err := conn.ReadMessage()
+		messageType, p, err := conn.ReadMessage()
 
 		if string(p) == "run" {
 			webcam, err := gocv.VideoCaptureDevice(0)
@@ -64,7 +64,12 @@ func reader(conn *websocket.Conn) {
 
 			data := base64.StdEncoding.EncodeToString(a)
 
-			fmt.Println(data)
+			// fmt.Println(data)
+
+			if err := conn.WriteMessage(messageType, []byte(data)); err != nil {
+				log.Println(err)
+				return
+			}
 
 		}
 		if string(p) == "save" {
