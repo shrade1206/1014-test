@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,6 +36,7 @@ func homepage(w http.ResponseWriter, r *http.Request) {
 }
 
 func reader(conn *websocket.Conn) {
+	var a []byte
 
 	for {
 		_, p, err := conn.ReadMessage()
@@ -53,13 +55,22 @@ func reader(conn *websocket.Conn) {
 
 			defer webcam.Close()
 
+			buf, err := gocv.IMEncode(".jpg", img)
+			defer buf.Close()
+
+			a = buf.GetBytes()
+
+			// d, _ := os.ReadFile(a)
+
+			data := base64.StdEncoding.EncodeToString(a)
+
+			fmt.Println(data)
+
 		}
-		// if string(p) == "save" {
+		if string(p) == "save" {
 
-		// 	gocv.IMWrite("save.jpg", img)
-
-		// 	img.Close()
-		// }
+			os.WriteFile("demo.jpg", a, os.ModePerm)
+		}
 
 		if err != nil {
 			log.Println(err)
